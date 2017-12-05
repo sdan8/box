@@ -1,0 +1,31 @@
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>box</title>
+
+    <script src="js/utils.js"></script>
+    <script src="js/maps.js"></script>
+    <script src="js/man.js"></script>
+    <script src="js/main.js"></script>
+    <script src="js/game.js"></script>
+    <script src="js/scene/scene_main.js"></script>
+    <script src="js/scene/scene_title.js"></script>
+
+    <style>
+        #canvas{
+            border: 1px solid #bbb;
+        }
+    </style>
+</head>
+<body>
+    <h1>推箱子</h1>
+    <h4>方向键（↑ ← ↓ →）控制人物移动</h4>
+    <h4>按‘r’重新开始这一关</h4>
+    <canvas id="canvas" width="400" height="400"></canvas>
+    <script>
+        _main('#canvas', 400, 400)
+    </script>
+</body>
+</html>
