@@ -1,8 +1,20 @@
-class SceneTitle {
+class SceneTitle extends Scene{
     constructor (game){
-        this.game = game
-        this.maps = window.boxMaps
+        super(game)
         this.paused = false
+        this.keydown = (event) => {
+            let k = event.key
+            if (!this.paused){
+                if (k == 's'){
+                    let scene = this.game.sceneFactory.getSceneMainInstance()
+                    this.loadScene(scene)
+                }
+                if (k == 'e'){
+                    let scene = this.game.sceneFactory.getSceneEditorInstance()
+                    this.loadScene(scene)
+                }
+            }
+        }
     }
     // 场景初始化
     init (){
@@ -10,15 +22,7 @@ class SceneTitle {
         log('sceneTitle init')
         this.load()
         // 添加监听事件
-        window.addEventListener('keydown', (event) => {
-            let k = event.key
-            if (!this.paused){
-                if (k == 's'){
-                    let scene = new SceneMain(this.game)
-                    scene.init()
-                }
-            }
-        })
+        window.addEventListener('keydown', this.keydown)
     }
     load (){
         let canvas = this.game.canvas
@@ -37,11 +41,17 @@ class SceneTitle {
         context.fillStyle = '#F44336'
         context.textAlign = 'center'
         context.fillText("按's'开始游戏！", canvas.width/2, 150)
+        context.fillText("按'e'进入地图编辑模式！", canvas.width/2, 200)
     }
     drawItem (x, y, item){
         let w = CONFIG.blockWidth
         let img = this.game.images[item]
         let context = this.game.context
         context.drawImage(img, x * w, y * w, w, w)
+    }
+    loadScene (scene) {
+        window.removeEventListener('keydown', this.keydown)
+
+        scene.init()
     }
 }

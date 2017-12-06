@@ -1,55 +1,56 @@
-class SceneMain extends Scene{
+class SceneEditor extends Scene{
     constructor (game){
         super(game)
-        this.level = 1
         this.man = new Man('down')
-        this.paused = false
         this.keydown = (event) => {
             let k = event.key
-            if (!this.paused){
-                if (k == 'ArrowUp'){
-                    this.man.moveUp(this.map)
-                    this.refresh(this.map)
-                }
-                if (k == 'ArrowDown'){
-                    this.man.moveDown(this.map)
-                    this.refresh(this.map)
-                }
-                if (k == 'ArrowLeft'){
-                    this.man.moveLeft(this.map)
-                    this.refresh(this.map)
-                }
-                if (k == 'ArrowRight'){
-                    this.man.moveRight(this.map)
-                    this.refresh(this.map)
-                }
-                if (k == 'r'){
-                    this.loadLevel (this.level)
-                }
+            // 保存地图
+            if (k == 'c'){
+                this.saveMap(this.map)
             }
+            // 重置地图
+            if (k == 'z'){
+                this.resetMap(this.map)
+            }
+            // 退出地图编辑模式
+            if (k == 'x'){
+                this.exit()
+            }
+        }
+        this.click = (event) => {
+            let canvas = this.game.canvas
+            if (event.target != canvas) {
+                return
+            }
+            let posX = event.offsetX
+            let posY = event.offsetY
+            if (posX > canvas.width || posY > canvas.height || posX <= 0 || posY <= 0){
+                return
+            }
+            let x = Math.ceil(posY / CONFIG.blockWidth) - 1
+            let y = Math.ceil(posX / CONFIG.blockWidth) - 1
+            this.changeItem(this.map, x, y)
         }
     }
     // 场景初始化
     init (){
-        // 加载地图
-        log('scene init')
-        this.loadLevel(this.level)
+        // 加载空地图
+        log('scene editor init...')
+        this.load()
         // 添加监听事件
         window.addEventListener('keydown', this.keydown)
+        window.addEventListener('click', this.click)
     }
-    loadLevel (level){
+    load (){
         let canvas = this.game.canvas
         this.game.context.clearRect(0, 0, canvas.width, canvas.height)
-        level--
-        // this.map = this.maps[level]
         this.map = new Array()
-        for (let i = 0; i < this.maps[level].length; i++){
+        for (let i = 0; i < this.maps[0].length; i++){
             this.map[i] = new Array()
-            for (let j = 0; j < this.maps[level][i].length; j++){
-                this.map[i][j] = this.maps[level][i][j]
+            for (let j = 0; j < this.maps[0][i].length; j++){
+                this.map[i].push(1)
             }
         }
-        log(this.map)
         this.drawMap (this.map)
     }
     drawMap (map){
@@ -98,39 +99,35 @@ class SceneMain extends Scene{
         let ctx = this.game.context
         ctx.clearRect(0, 0, canvas.width, canvas.height)
         this.drawMap(map)
-        // 判断是否胜利
-        if (this.isWin(map)){
-            // 跳下一关
-            this.paused = true
-            setTimeout(() => {
-                this.nextLevel()
-                this.paused = false
-            }, 500);
-        }
     }
-    isWin (map){
+    saveMap (map){
+        log(map)
+    }
+    resetMap (map){
         for (let i = 0; i < map.length; i++){
             for (let j = 0; j < map[i].length; j++){
-                if (map[i][j] == MAP_CODE.ball || map[i][j] == MAP_CODE.manBall){
-                    return false
-                }
+                map[i][j] = 1
             }
         }
-        return true
+        this.refresh(map)
     }
-    nextLevel (){
-        this.level++
-        if (this.level > this.maps.length){
-            alert('恭喜通关！')
-            this.level = 1
-            let scene = this.game.sceneFactory.getSceneTitleInstance()
-            this.loadScene(scene)
-            return
+    changeItem (map, x, y){
+        map[x][y] ++
+        if (map[x][y] == MAP_CODE.man){
+            this.man.x = x
+            this.man.y = y
         }
-        this.loadLevel(this.level)
+        // 如果超出范围
+        if (map[x][y] == MAP_CODE.manBall + 1){
+            // 变为第一个
+            map[x][y] = MAP_CODE.block
+        }
+        this.refresh(map)
     }
-    loadScene (scene){
+    exit (){
+        window.removeEventListener('click', this.click)
         window.removeEventListener('keydown', this.keydown)
+        let scene = this.game.sceneFactory.getSceneTitleInstance()
         scene.init()
     }
 }
